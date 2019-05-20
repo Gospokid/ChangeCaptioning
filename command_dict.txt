@@ -1,0 +1,17 @@
+label pre_processing
+python scripts/my_prepro_labels.py --input_json data/combined.json --output_json data/combined_out.json --output_h5 data/combined_out
+
+feature pre_processing
+python scripts/my_prepro_feats.py --input_json data/combined.json --output_dir data/combined_out --images_root images
+
+train
+python train.py --id fc --caption_model fc --input_json data/cocotalk.json --input_fc_dir data/cocotalk_fc --input_att_dir data/cocotalk_att --input_label_h5 data/cocotalk_label.h5 --batch_size 10 --learning_rate 5e-4 --learning_rate_decay_start 0 --scheduled_sampling_start 0 --checkpoint_path log_fc --save_checkpoint_every 6000 --val_images_use 5000 --max_epochs 30
+python train.py --id att2in2_origin --caption_model att2in2 --input_json data/combined_out.json --input_fc_dir data/combined_out_fc --input_att_dir data/combined_out_att --input_label_h5 data/combined_out_label.h5 --batch_size 10 --learning_rate 5e-4 --learning_rate_decay_start 0 --scheduled_sampling_start 0 --checkpoint_path log_att2in2_origin --save_checkpoint_every 6000 --val_images_use 5000 --max_epochs 30
+
+evaluation
+python eval.py --model model.pth --infos_path infos.pkl --image_folder blah --num_images 10
+python eval.py --model log_att2in2_div5/model-best.pth --infos_path log_att2in2_div5/infos_att2in2_div5-best.pkl --image_folder test_images --num_images 30
+
+evaluation_visual_check
+cd vis
+python -m SimpleHTTPServer
